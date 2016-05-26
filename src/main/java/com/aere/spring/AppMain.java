@@ -1,4 +1,4 @@
-package com.aere.spring.rabbitmq;
+package com.aere.spring;
 
 import com.aere.spring.rabbitmq.config.MQConfigConsumer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
