@@ -3,11 +3,14 @@
  */
 package com.aere.spring.rabbitmq.config;
 
+import com.aere.spring.mybatis.dao.UserMapper;
+import com.aere.spring.mybatis.model.User;
 import com.aere.spring.rabbitmq.MQMessageHandler;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +18,10 @@ import org.springframework.context.annotation.Configuration;
 public class MQConfigConsumer {
     public static final String queueName = "aerexu.queue";
     public static final String exchangeName = "aerexu.exchange";
+
+    @Autowired
+    UserMapper userMapper;
+
     @Bean
     public ConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory("golden-kangaroo.rmq.cloudamqp.com");
@@ -30,7 +37,12 @@ public class MQConfigConsumer {
         container.setConnectionFactory(connectionFactory());
         container.setQueueNames(queueName);
         container.setMessageListener(new MessageListenerAdapter(
-                (MQMessageHandler<String>) s -> System.out.println("Recieve message that:"+s)));
+                (MQMessageHandler<String>) s -> {
+                    System.out.println("Recieve message that:" + s);
+                    User user = new User();
+                    user.setName(s);
+                    userMapper.insert(user);
+                }));
         return container;
     }
 }
